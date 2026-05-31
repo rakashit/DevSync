@@ -76,9 +76,5 @@ Start the frontend development server:
 npm run dev
 ```
 
-### 4. Start Collaborating!
-Open your browser and navigate to `http://localhost:5173`. 
-Create a new room, share the URL or Room ID with your teammates, and start coding together!
-
 ## 📜 License
 This project is licensed under the MIT License.
