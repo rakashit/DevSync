@@ -34,6 +34,18 @@ export const fetchRooms = async () => {
   return response.json();
 };
 
+export const joinRoom = async (roomId: string) => {
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${API_BASE_URL}/rooms/${roomId}/join`, {
+    method: 'POST',
+    headers,
+  });
+  if (!response.ok) {
+    throw new Error('Failed to join room');
+  }
+  return response.json();
+};
+
 export const fetchAIReview = async (code: string, language: string) => {
   const headers = await getAuthHeaders();
   const response = await fetch(`${API_BASE_URL}/ai/review`, {

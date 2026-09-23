@@ -8,8 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Users, MessageSquareCode, Bot, Loader2, Send, FileCode2, Plus, Trash2, FolderOpen, GitPullRequest, Play, Terminal, X, Phone } from 'lucide-react';
-import { fetchAIReview, fetchAIAutocomplete, fetchGitHubPR, executeCode } from '../services/api';
+import { ArrowLeft, Users, MessageSquareCode, Bot, Loader2, Send, FileCode2, Plus, Trash2, FolderOpen, GitPullRequest, Play, Terminal, X, Phone, UserPlus } from 'lucide-react';
+import { fetchAIReview, fetchAIAutocomplete, fetchGitHubPR, executeCode, joinRoom } from '../services/api';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { useTheme } from '../components/ThemeProvider';
 import { VideoChat } from '../components/VideoChat';
@@ -35,6 +35,7 @@ const Room = () => {
   const [isImportingPR, setIsImportingPR] = useState(false);
   const [prUrl, setPrUrl] = useState('');
   const [isLoadingPR, setIsLoadingPR] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const [connectedUsers, setConnectedUsers] = useState<ConnectedUser[]>([]);
   const [remoteCursors, setRemoteCursors] = useState<Record<string, any>>({});
@@ -58,6 +59,9 @@ const Room = () => {
 
   useEffect(() => {
     if (!user || !id) return;
+
+    // Add user to workspace permanently in the backend
+    joinRoom(id).catch(err => console.error("Failed to join room permanently", err));
 
     socketRef.current = io(SOCKET_SERVER_URL, {
       query: {
@@ -291,6 +295,16 @@ const Room = () => {
     return 'plaintext';
   };
 
+  const handleInvite = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy link", err);
+    }
+  };
+
   const monacoTheme = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'vs-dark' : 'light';
 
   return (
@@ -326,6 +340,16 @@ const Room = () => {
           </div>
           
           <ThemeToggle />
+
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={handleInvite} 
+            className={`flex items-center gap-2 rounded-full px-4 shadow-sm transition-all ${isCopied ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' : ''}`}
+          >
+            <UserPlus className="w-4 h-4" />
+            {isCopied ? 'Copied!' : 'Invite'}
+          </Button>
           
           <Button 
             size="sm" 

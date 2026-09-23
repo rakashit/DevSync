@@ -69,6 +69,41 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
+// Join a room (add user to members)
+router.post('/:id/join', verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const uid = req.user.uid;
+
+    if (!db) {
+      const roomIndex = mockRooms.findIndex(r => r.id === id);
+      if (roomIndex === -1) return res.status(404).json({ error: 'Room not found' });
+      if (!mockRooms[roomIndex].members.includes(uid)) {
+        mockRooms[roomIndex].members.push(uid);
+      }
+      return res.status(200).json({ message: 'Joined successfully' });
+    }
+
+    const roomRef = db.collection('rooms').doc(id);
+    const room = await roomRef.get();
+
+    if (!room.exists) {
+      return res.status(404).json({ error: 'Room not found' });
+    }
+
+    const members = room.data().members || [];
+    if (!members.includes(uid)) {
+      members.push(uid);
+      await roomRef.update({ members });
+    }
+
+    res.status(200).json({ message: 'Joined successfully' });
+  } catch (error) {
+    console.error('Error joining room:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Update room status
 router.patch('/:id/status', verifyToken, async (req, res) => {
   try {
