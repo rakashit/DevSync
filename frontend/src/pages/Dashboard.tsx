@@ -67,7 +67,7 @@ const Dashboard = () => {
     setIsCreating(true);
     try {
       const newRoom = await createRoom(newRoomTitle, newRoomDesc);
-      setRooms([newRoom, ...rooms]);
+      setRooms(prevRooms => [newRoom, ...prevRooms]);
       setIsDialogOpen(false);
       setNewRoomTitle('');
       setNewRoomDesc('');
@@ -83,7 +83,7 @@ const Dashboard = () => {
     if (!window.confirm('Are you sure you want to delete this room? This action cannot be undone.')) return;
     try {
       await deleteRoom(roomId);
-      setRooms(rooms.filter(room => room.id !== roomId));
+      setRooms(prevRooms => prevRooms.filter(room => room.id !== roomId));
     } catch (error) {
       console.error("Failed to delete room", error);
       alert("Failed to delete room. You may not be the owner.");
