@@ -171,14 +171,15 @@ const Room = () => {
     setShowTerminal(true);
     setExecutionOutput('Executing...');
     try {
-      const data = await executeCode(files[activeFile], currentLang);
+      const data = await executeCode(files[activeFile] || '', currentLang);
+      const timestamp = new Date().toLocaleTimeString();
       if (data.error) {
-        setExecutionOutput(`Error:\n${data.error}\n\nOutput:\n${data.output}`);
+        setExecutionOutput(`[${timestamp}] Error:\n${data.error}\n\nOutput:\n${data.output}`);
       } else {
-        setExecutionOutput(data.output || 'Execution completed with no output.');
+        setExecutionOutput(`[${timestamp}] Success:\n${data.output || 'Execution completed with no output (try adding console.log).'}`);
       }
     } catch (error: any) {
-      setExecutionOutput(`Failed to execute: ${error.message}`);
+      setExecutionOutput(`[${new Date().toLocaleTimeString()}] Failed to execute: ${error.message}`);
     } finally {
       setIsExecuting(false);
     }
@@ -470,8 +471,8 @@ const Room = () => {
         </div>
 
         {/* Editor & Terminal Section */}
-        <div className="flex-1 flex flex-col relative bg-[#1e1e1e]">
-          <div className="flex-1 relative">
+        <div className="flex-1 flex flex-col relative bg-[#1e1e1e] min-h-0 overflow-hidden">
+          <div className="flex-1 relative min-h-0 overflow-hidden">
             {activeFile ? (
               <Editor
                 key={activeFile}
@@ -510,34 +511,30 @@ const Room = () => {
           </div>
           
           {/* Terminal Panel */}
-          <AnimatePresence>
-            {showTerminal && (
-              <motion.div 
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: terminalHeight, opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="border-t border-gray-800 bg-[#1e1e1e] flex flex-col shrink-0 relative"
-              >
-                {/* Drag Handle */}
-                <div 
-                  className="absolute top-0 left-0 w-full h-1 cursor-row-resize z-50 hover:bg-primary/50 transition-colors"
-                  onMouseDown={(e) => { e.preventDefault(); setIsDraggingTerminal(true); }}
-                />
-                
-                <div className="h-8 bg-[#252526] flex items-center justify-between px-4 border-b border-gray-800 mt-1">
-                  <span className="text-xs text-gray-300 font-mono flex items-center gap-2">
-                    <Terminal className="w-3 h-3" /> Terminal Output
-                  </span>
-                  <button onClick={() => setShowTerminal(false)} className="text-gray-400 hover:text-white">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="flex-1 p-4 overflow-auto font-mono text-xs text-gray-300 whitespace-pre-wrap custom-scrollbar">
-                  {executionOutput}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {showTerminal && (
+            <div 
+              style={{ height: terminalHeight }}
+              className="border-t border-gray-800 bg-[#1e1e1e] flex flex-col shrink-0 relative overflow-hidden transition-all duration-300"
+            >
+              {/* Drag Handle */}
+              <div 
+                className="absolute top-0 left-0 w-full h-1 cursor-row-resize z-50 hover:bg-primary/50 transition-colors"
+                onMouseDown={(e) => { e.preventDefault(); setIsDraggingTerminal(true); }}
+              />
+              
+              <div className="h-8 bg-[#252526] flex items-center justify-between px-4 border-b border-gray-800 mt-1">
+                <span className="text-xs text-gray-300 font-mono flex items-center gap-2">
+                  <Terminal className="w-3 h-3" /> Terminal Output
+                </span>
+                <button onClick={() => setShowTerminal(false)} className="text-gray-400 hover:text-white">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex-1 p-4 overflow-auto font-mono text-xs text-gray-300 whitespace-pre-wrap custom-scrollbar">
+                {executionOutput}
+              </div>
+            </div>
+          )}
           
           {/* Floating Video Chat */}
           <AnimatePresence>

@@ -83,7 +83,7 @@ const Dashboard = () => {
     if (!window.confirm('Are you sure you want to delete this room? This action cannot be undone.')) return;
     try {
       await deleteRoom(roomId);
-      setRooms(prevRooms => prevRooms.filter(room => room.id !== roomId));
+      setRooms(rooms.filter(room => room.id !== roomId));
     } catch (error) {
       console.error("Failed to delete room", error);
       alert("Failed to delete room. You may not be the owner.");
@@ -221,14 +221,14 @@ const Dashboard = () => {
               </Button>
             </motion.div>
           ) : (
-            <motion.div 
-              variants={containerVariants}
-              initial="hidden"
-              animate="show"
-              className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-            >
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {rooms.map(room => (
-                <motion.div key={room.id} variants={itemVariants}>
+                <motion.div 
+                  key={room.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+                >
                   <Card 
                     className="h-full hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col group border-gray-200/60 dark:border-gray-800/60 bg-white/60 dark:bg-gray-900/40 backdrop-blur-md hover:-translate-y-1 hover:border-primary/30 dark:hover:border-primary/30" 
                     onClick={() => navigate(`/room/${room.id}`)}
@@ -277,7 +277,7 @@ const Dashboard = () => {
                   </Card>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           )}
         </main>
       </div>

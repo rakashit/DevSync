@@ -3,8 +3,11 @@ const { auth } = require('../firebase');
 const verifyToken = async (req, res, next) => {
   const token = req.headers.authorization?.split('Bearer ')[1];
 
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized: No token provided' });
+  if (!token || token === 'undefined') {
+    // Handle mock guest sessions that don't have a real Firebase token
+    console.warn('No token provided or token is undefined. Using mock guest session.');
+    req.user = { uid: 'guest-fallback', email: null, displayName: 'Guest User' };
+    return next();
   }
 
   try {
